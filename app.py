@@ -3,8 +3,13 @@ import numpy as np
 import pickle
 from flask import Flask,render_template,request,jsonify
 from flask_cors import CORS,cross_origin
+import warnings
+warnings.filterwarnings("ignore")
 
 db = pymysql.connect(host="localhost",user="root",passwd="mysql",database="adityaraj")
+cur = db.cursor()
+cur.execute("CREATE TABLE if not exists salary2 ( Experience int NOT NULL,  TestScore int NOT NULL , InterviewScore int)")
+db.commit()
 
 app = Flask(__name__)
 model = pickle.load(open('model.pkl','rb'))
@@ -21,8 +26,7 @@ def predict():
         experience = request.form['experience']
         test_score = request.form['test_score']
         interview_score = request.form['interview_score']
-        cur = db.cursor()
-        cur.execute(f"Insert into salary1 (Experience,TestScore,InterviewScore) values ({experience},{test_score},{interview_score})")
+        cur.execute(f"Insert into salary2 (Experience,TestScore,InterviewScore) values ({experience},{test_score},{interview_score})")
         db.commit()
         feat = [[experience,test_score,interview_score]]
         pred = model.predict(feat)
@@ -31,4 +35,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
